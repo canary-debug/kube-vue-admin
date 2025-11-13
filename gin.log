@@ -1,0 +1,8 @@
+[GIN-debug] POST   /api/auth/login           --> github.com/canary-debug/kube-vue-admin/api.Login (5 handlers)
+[GIN-debug] POST   /api/auth/register        --> github.com/canary-debug/kube-vue-admin/api.Register (5 handlers)
+[GIN-debug] GET    /                         --> main.main.func1 (5 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://github.com/gin-gonic/gin/blob/master/docs/doc.md#dont-trust-all-proxies for details.
+[GIN-debug] Listening and serving HTTP on :9000
+[GIN] 2025/11/12 - 16:48:27 | 400 |            0s |       127.0.0.1 | POST     "/api/auth/register?username=kube&password=1qazWSX!&email=1@admin.com"
+[GIN] 2025/11/12 - 16:49:51 | 400 |            0s |       127.0.0.1 | POST     "/api/auth/register?username=kube&password=1qazWSX!&email=1@admin.com"
