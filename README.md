@@ -100,3 +100,5 @@ kube-vue-admin/
 
 ---
 *该项目为 Kubernetes 可视化管理平台的后端服务组件*
+
+$env:GOOS="linux"; $env:GOARCH="amd64"; go build -o kube-vue-admin . 
