@@ -15,6 +15,7 @@ import (
 
 var Clientset *kubernetes.Clientset
 
+// 初始化 Kubernetes 客户端
 // 创建 Clientset
 func init() {
 	var kubeconfig *string
