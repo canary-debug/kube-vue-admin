@@ -1,15 +1,33 @@
 package main
 
 import (
-	"github.com/canary-debug/kube-vue-admin/api"
-	"github.com/canary-debug/kube-vue-admin/database"
-	"github.com/gin-gonic/gin"
-	_ "github.com/go-sql-driver/mysql"
 	"io"
 	"os"
+
+	"github.com/canary-debug/kube-vue-admin/api"
+	"github.com/canary-debug/kube-vue-admin/api/resources"
+	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
+	"github.com/canary-debug/kube-vue-admin/database"
+	"github.com/canary-debug/kube-vue-admin/tokens"
+	"github.com/gin-gonic/gin"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
+	// 生产模式发布
+	ginMode := os.Getenv("GIN_MODE")
+	switch ginMode {
+	case "release":
+		gin.SetMode(gin.ReleaseMode) // 生产环境：禁用调试信息，性能更优
+	case "debug":
+		gin.SetMode(gin.DebugMode) // 可选：手动指定调试模式
+	default:
+		gin.SetMode(gin.DebugMode) // 默认：开发环境（dev分支）使用调试模式
+	}
+
+	// 加载密钥
+	tokens.LoadToekn()
+
 	// 生成路由
 	r := gin.Default()
 
@@ -26,8 +44,10 @@ func main() {
 	r.Use(gin.Logger()) // 这会记录所有请求日志
 	r.Use(gin.Recovery())
 
-	// 初始化数据库连接和表
+	// 初始化 Mysql
 	database.ConnectDatabase()
+	// 初始化 Redis
+	database.ConnectRedis()
 
 	// 登陆注册路由
 	authRoutes := r.Group("/api/auth")
@@ -37,12 +57,35 @@ func main() {
 
 		//  注册接口
 		authRoutes.POST("/register", api.Register)
+
 	}
 
-	// 控制器资源路由
-	k8sRoutes := r.Group("/api/k8s")
+	// 退出接口 todo (还没实现退出是返回退出的用户名字)
+	privateAuth := r.Group("/api/auth")
+	privateAuth.Use(tokens.JWTMiddleware()) // 给这个组应用中间件
 	{
-		k8sRoutes.GET("/namespaces/:namespace/controllers", api.GetControllersInNamespace)
+		privateAuth.POST("/logout", api.LoginOut)
+	}
+
+	// 受保护的接口, 需要带上 Token
+	// 控制器资源路由
+	k8sRoutes := r.Group("/api/k8s", tokens.JWTMiddleware())
+	{
+
+		// GetControllersInNamespace 获取指定命名空间下的所有控制器资源
+		k8sRoutes.GET("/namespaces/:namespace/controllers", resources.GetControllersInNamespace)
+		// 获取命名空间, 资源名称 返回 pod 信息
+		k8sRoutes.GET("/:namespace/:resourcename/pods", resources.GetPod)
+		// 获取节点资源
+		k8sRoutes.GET("/get/nodes", get_nodes_resources.GetNodes)
+		// 获取节点详细信息
+		k8sRoutes.GET("/get/nodename", get_nodes_resources.GetNodeName)
+		// 获取容器组
+		k8sRoutes.GET("/get/container_group/:namespace", get_nodes_resources.GetContainerGroup)
+		// 获取 namespaces 的个数
+		k8sRoutes.GET("/get/namespaces", get_nodes_resources.GetNameSpacesLen)
+		// 获取所有命名空间的名字
+		k8sRoutes.GET("/get/namespaces/namespacename", get_nodes_resources.GetNameSpaces)
 	}
 
 	r.GET("/", func(c *gin.Context) {
@@ -60,7 +103,7 @@ func main() {
 func cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*") // 或指定域名，如 "http://your-frontend.com"
-		c.Header("Access-Control-Allow-Methods", "POST, OPTIONS")
+		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if c.Request.Method == "OPTIONS" {

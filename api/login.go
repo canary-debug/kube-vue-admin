@@ -7,6 +7,7 @@ import (
 
 	"github.com/canary-debug/kube-vue-admin/database"
 	"github.com/canary-debug/kube-vue-admin/models"
+	"github.com/canary-debug/kube-vue-admin/tokens"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"golang.org/x/crypto/bcrypt"
@@ -70,15 +71,16 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// 登录成功
+	// 生成 Token
+	token, err := tokens.GenerateToken(user.ID, user.Username)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "生成令牌失败"})
+	}
+
+	// 登录成功, 返回 Toekn
 	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  "登录成功",
-		"data": gin.H{
-			"user_id":  req.ID,
-			"username": req.Username,
-			"password": req.Password,
-		},
+		"code":  200,
+		"token": token,
 	})
 
 }
