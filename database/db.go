@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/canary-debug/kube-vue-admin/models"
@@ -31,7 +32,8 @@ func ConnectDatabase() {
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Printf("failed to connect database: %v", err)
+		//panic("failed to connect database")
 	}
 
 	// 自动迁移所有模型
