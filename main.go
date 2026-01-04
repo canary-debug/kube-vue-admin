@@ -8,6 +8,7 @@ import (
 	"github.com/canary-debug/kube-vue-admin/api/resources"
 	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
 	"github.com/canary-debug/kube-vue-admin/database"
+	"github.com/canary-debug/kube-vue-admin/pkg/informer"
 	"github.com/canary-debug/kube-vue-admin/tokens"
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -24,6 +25,9 @@ func main() {
 	default:
 		gin.SetMode(gin.DebugMode) // 默认：开发环境（dev分支）使用调试模式
 	}
+
+	// 加载 informer
+	informer.Informer()
 
 	// 加载密钥
 	tokens.LoadToekn()
@@ -86,6 +90,7 @@ func main() {
 		k8sRoutes.GET("/get/namespaces", get_nodes_resources.GetNameSpacesLen)
 		// 获取所有命名空间的名字
 		k8sRoutes.GET("/get/namespaces/namespacename", get_nodes_resources.GetNameSpaces)
+		k8sRoutes.GET("/get/deployment/:namespace", get_nodes_resources.GetDeployment)
 	}
 
 	r.GET("/", func(c *gin.Context) {
