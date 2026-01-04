@@ -5,10 +5,28 @@ import (
 	"net/http"
 
 	"github.com/canary-debug/kube-vue-admin/api/resources"
+	"github.com/canary-debug/kube-vue-admin/pkg/global"
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
+
+func GetNodeLen(c *gin.Context) {
+	// 使用 global.Nodes.Lister() 获取所有节点，然后计算长度
+	nodes, err := global.Nodes.List(labels.Everything())
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to get nodes: " + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"node_len": len(nodes),
+	})
+}
 
 func GetNodes(c *gin.Context) {
 	// 获取所有节点信息

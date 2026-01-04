@@ -82,6 +82,8 @@ func main() {
 		k8sRoutes.GET("/:namespace/:resourcename/pods", resources.GetPod)
 		// 获取节点资源
 		k8sRoutes.GET("/get/nodes", get_nodes_resources.GetNodes)
+		// 获取节点个数
+		k8sRoutes.GET("/get/nodes/len", get_nodes_resources.GetNodeLen)
 		// 获取节点详细信息
 		k8sRoutes.GET("/get/nodename", get_nodes_resources.GetNodeName)
 		// 获取容器组

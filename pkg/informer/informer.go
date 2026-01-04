@@ -20,6 +20,8 @@ func Informer() {
 
 	// 声明获取资源的 GroupVersionResource
 	gvrs := []schema.GroupVersionResource{
+		// Node
+		{Group: "", Version: "v1", Resource: "nodes"},
 		{Group: "", Version: "v1", Resource: "pods"},
 		{Group: "apps", Version: "v1", Resource: "deployments"},
 	}
@@ -40,6 +42,7 @@ func Informer() {
 	// 关键修改：设置全局变量
 	global.SharedInformers = SharedInformers
 	global.Deployments = SharedInformers.Apps().V1().Deployments().Lister()
+	global.Nodes = SharedInformers.Core().V1().Nodes().Lister()
 
 	// 打印一下信息
 	log.Println("所有 Informer 启动成功！")
