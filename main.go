@@ -92,7 +92,10 @@ func main() {
 		k8sRoutes.GET("/get/namespaces", get_nodes_resources.GetNameSpacesLen)
 		// 获取所有命名空间的名字
 		k8sRoutes.GET("/get/namespaces/namespacename", get_nodes_resources.GetNameSpaces)
+		// 获取指定 deployment
 		k8sRoutes.GET("/get/deployment/:namespace", get_nodes_resources.GetDeployment)
+		// 获取 pod 个数
+		k8sRoutes.GET("/get/pods/len", resources.GetPodCount)
 	}
 
 	r.GET("/", func(c *gin.Context) {

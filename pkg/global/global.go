@@ -10,4 +10,5 @@ var (
 	SharedInformers informers.SharedInformerFactory // SharedInformers 全局共享的 informers
 	Deployments     v1.DeploymentLister             // 部署列表器
 	Nodes           corev1.NodeLister
+	Pods            corev1.PodLister
 )

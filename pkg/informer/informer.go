@@ -43,6 +43,7 @@ func Informer() {
 	global.SharedInformers = SharedInformers
 	global.Deployments = SharedInformers.Apps().V1().Deployments().Lister()
 	global.Nodes = SharedInformers.Core().V1().Nodes().Lister()
+	global.Pods = SharedInformers.Core().V1().Pods().Lister()
 
 	// 打印一下信息
 	log.Println("所有 Informer 启动成功！")
