@@ -96,6 +96,8 @@ func main() {
 		k8sRoutes.GET("/get/deployment/:namespace", get_nodes_resources.GetDeployment)
 		// 获取 pod 个数
 		k8sRoutes.GET("/get/pods/len", resources.GetPodCount)
+		// 获取集群是否健康
+		k8sRoutes.GET("/get/cluster_healthz", get_nodes_resources.Get_Cluster_Healthz)
 	}
 
 	r.GET("/", func(c *gin.Context) {
