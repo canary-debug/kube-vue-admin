@@ -6,6 +6,7 @@ import (
 
 	"github.com/canary-debug/kube-vue-admin/api"
 	"github.com/canary-debug/kube-vue-admin/api/resources"
+	"github.com/canary-debug/kube-vue-admin/api/resources/deployment"
 	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
 	"github.com/canary-debug/kube-vue-admin/database"
 	"github.com/canary-debug/kube-vue-admin/pkg/informer"
@@ -98,6 +99,8 @@ func main() {
 		k8sRoutes.GET("/get/pods/len", resources.GetPodCount)
 		// 获取集群是否健康
 		k8sRoutes.GET("/get/cluster_healthz", get_nodes_resources.Get_Cluster_Healthz)
+		// 重启 deployment
+		k8sRoutes.POST("/restart/deployment", deployment.RestartDeployment)
 	}
 
 	r.GET("/", func(c *gin.Context) {

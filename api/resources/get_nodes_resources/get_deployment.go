@@ -35,9 +35,9 @@ func GetDeployment(c *gin.Context) {
 	}
 	// 遍历 deployments 返回
 	for _, deployment := range deployments {
-		// 获取 Deployment 的名字
+		// 获取 deployment 的名字
 		//deploymentName = append(deploymentName, deployment.Name)
-		// 获取 Deployment 的状态信息
+		// 获取 deployment 的状态信息
 		statusInfo := map[string]interface{}{
 			"name":     deployment.Name,
 			"replicas": deployment.Status.Replicas,
