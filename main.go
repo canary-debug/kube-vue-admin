@@ -7,6 +7,7 @@ import (
 	"github.com/canary-debug/kube-vue-admin/api"
 	"github.com/canary-debug/kube-vue-admin/api/resources"
 	"github.com/canary-debug/kube-vue-admin/api/resources/deployment"
+	"github.com/canary-debug/kube-vue-admin/api/resources/etcd"
 	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
 	"github.com/canary-debug/kube-vue-admin/database"
 	"github.com/canary-debug/kube-vue-admin/pkg/informer"
@@ -105,6 +106,8 @@ func main() {
 		k8sRoutes.POST("/restart/deployment", deployment.RestartDeployment)
 		// 获取 deployment 下的所有 pods
 		k8sRoutes.POST("/deployment/pods", deployment.Get_Deployment_Pods)
+		// 获取etcd状态
+		k8sRoutes.GET("/etcd/status", etcd.GetEtcdStatus)
 	}
 
 	r.GET("/", func(c *gin.Context) {
