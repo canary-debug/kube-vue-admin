@@ -28,7 +28,9 @@ func main() {
 	}
 
 	// 加载 informer
-	informer.Informer()
+	// 在一个独立的协程里启动，不要让它阻塞主流程，但要保证 stopCh 没关闭
+	stopCh := make(chan struct{})
+	go informer.StartInformer(stopCh)
 
 	// 加载密钥
 	tokens.LoadToekn()

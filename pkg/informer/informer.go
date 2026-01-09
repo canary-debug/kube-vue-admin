@@ -1,7 +1,6 @@
 package informer
 
 import (
-	"context"
 	"log"
 
 	"github.com/canary-debug/kube-vue-admin/api/resources"
@@ -10,42 +9,29 @@ import (
 	"k8s.io/client-go/informers"
 )
 
-func Informer() {
-	// 创建一个上下文，用于取消请求
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel() // 延迟调用取消请求
-
-	// 获取所有 Namespace 的 SharedInformer
+func StartInformer(stopCh <-chan struct{}) {
+	// 1. 使用全局 Clientset 创建 Factory
 	SharedInformers := informers.NewSharedInformerFactory(resources.Clientset, 0)
 
-	// 声明获取资源的 GroupVersionResource
+	// 2. 注册资源（你的 gvrs 逻辑没问题）
 	gvrs := []schema.GroupVersionResource{
-		// Node
 		{Group: "", Version: "v1", Resource: "nodes"},
 		{Group: "", Version: "v1", Resource: "pods"},
 		{Group: "apps", Version: "v1", Resource: "deployments"},
 	}
-
-	// 为每个 GroupVersionResource 创建 SharedInformer
 	for _, gvr := range gvrs {
-		if _, err := SharedInformers.ForResource(gvr); err != nil {
-			panic(err)
-		}
+		SharedInformers.ForResource(gvr)
 	}
 
-	// 启动所有 SharedInformer
-	SharedInformers.Start(ctx.Done())
+	// 3. 启动并等待同步。注意这里传入的是 stopCh
+	SharedInformers.Start(stopCh)
+	SharedInformers.WaitForCacheSync(stopCh)
 
-	// 等待所有 SharedInformer 同步
-	SharedInformers.WaitForCacheSync(ctx.Done())
-
-	// 关键修改：设置全局变量
+	// 4. 赋值全局变量
 	global.SharedInformers = SharedInformers
 	global.Deployments = SharedInformers.Apps().V1().Deployments().Lister()
 	global.Nodes = SharedInformers.Core().V1().Nodes().Lister()
 	global.Pods = SharedInformers.Core().V1().Pods().Lister()
 
-	// 打印一下信息
-	log.Println("所有 Informer 启动成功！")
-
+	log.Println("所有 Informer 启动同步完成，正在持续监听...")
 }
