@@ -101,6 +101,8 @@ func main() {
 		k8sRoutes.GET("/get/cluster_healthz", get_nodes_resources.Get_Cluster_Healthz)
 		// 重启 deployment
 		k8sRoutes.POST("/restart/deployment", deployment.RestartDeployment)
+		// 获取 deployment 下的所有 pods
+		k8sRoutes.POST("/deployment/pods", deployment.Get_Deployment_Pods)
 	}
 
 	r.GET("/", func(c *gin.Context) {
