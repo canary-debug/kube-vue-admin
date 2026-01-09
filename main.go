@@ -108,6 +108,8 @@ func main() {
 		k8sRoutes.POST("/deployment/pods", deployment.Get_Deployment_Pods)
 		// 获取etcd状态
 		k8sRoutes.GET("/etcd/status", etcd.GetEtcdStatus)
+		// 获取 pod 日志
+		k8sRoutes.GET("/pod/logs", deployment.GetPodLogs)
 	}
 
 	r.GET("/", func(c *gin.Context) {
