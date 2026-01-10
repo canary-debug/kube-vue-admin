@@ -109,7 +109,7 @@ func main() {
 		// 获取etcd状态
 		k8sRoutes.GET("/etcd/status", etcd.GetEtcdStatus)
 		// 获取 pod 日志
-		k8sRoutes.GET("/pod/logs", deployment.GetPodLogs)
+		k8sRoutes.GET("/pod/logs/:namespace/:pod", deployment.GetPodLogs)
 	}
 
 	r.GET("/", func(c *gin.Context) {

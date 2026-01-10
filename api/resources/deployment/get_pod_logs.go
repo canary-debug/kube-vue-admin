@@ -18,6 +18,11 @@ func GetPodLogs(c *gin.Context) {
 	namespace := c.Param("namespace")
 	podName := c.Param("pod")
 	container := c.Query("container") // 选填，多容器 Pod 需指定
+	// 参数校验
+	if namespace == "" || podName == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "namespace and pod are required"})
+		return
+	}
 
 	// 参数：是否实时流
 	follow, _ := strconv.ParseBool(c.DefaultQuery("follow", "false"))
@@ -31,13 +36,13 @@ func GetPodLogs(c *gin.Context) {
 
 	// 1. 构造 PodLogOptions
 	opts := &corev1.PodLogOptions{
-		Container:  container,
-		Follow:     follow,    // 关键：true 表示实时流，false 表示一次性快照
-		TailLines:  tailLines, // 关键：控制行号
-		Timestamps: true,      // 可选：显示时间戳
+		Container: container,
+		Follow:    follow,    // 关键：true 表示实时流，false 表示一次性快照
+		TailLines: tailLines, // 关键：控制行号
+		//Timestamps: true,      // 可选：显示时间戳
 	}
 
-	// 2. 发起日志请求
+	// 发起日志请求
 	req := resources.Clientset.CoreV1().Pods(namespace).GetLogs(podName, opts)
 	stream, err := req.Stream(context.Background())
 	if err != nil {
@@ -46,7 +51,7 @@ func GetPodLogs(c *gin.Context) {
 	}
 	defer stream.Close()
 
-	// 3. 根据是否实时，选择输出方式
+	// 根据是否实时，选择输出方式
 	if follow {
 		// 实时流：使用 SSE (Server-Sent Events) 协议
 		c.Writer.Header().Set("Content-Type", "text/event-stream")
