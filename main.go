@@ -1,6 +1,7 @@
 package main
 
 import (
+	config "github.com/canary-debug/kube-vue-admin/configs"
 	"io"
 	"os"
 
@@ -26,6 +27,11 @@ func main() {
 		gin.SetMode(gin.DebugMode) // 可选：手动指定调试模式
 	default:
 		gin.SetMode(gin.DebugMode) // 默认：开发环境（dev分支）使用调试模式
+	}
+
+	// 初始化配置
+	if err := config.Init(); err != nil {
+		panic("配置初始化失败: " + err.Error())
 	}
 
 	// 加载 informer
@@ -110,6 +116,8 @@ func main() {
 		k8sRoutes.GET("/etcd/status", etcd.GetEtcdStatus)
 		// 获取 pod 日志
 		k8sRoutes.GET("/pod/logs/:namespace/:pod", deployment.GetPodLogs)
+		// 天气接口
+		k8sRoutes.GET("/weather", api.Weather)
 	}
 
 	r.GET("/", func(c *gin.Context) {

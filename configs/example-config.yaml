@@ -1,0 +1,4 @@
+weather:
+  api_key: ""  # api_key 百度天气api_key
+  district_id: ""  # district_id 城市ID
+
