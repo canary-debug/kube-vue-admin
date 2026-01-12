@@ -1,0 +1,92 @@
+# (请先执行以下命令) 假设你的 config 文件在当前目录或 ~/.kube/config
+# kubectl create ns kube-vue-admin
+# kubectl -n kube-vue-admin create configmap kube-config --from-file=config=/root/.kube/config
+
+# 1. 部署对象：定义 Pod 的副本数、镜像和资源限制
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kube-vue-backend
+  namespace: kube-vue-admin # 建议根据实际情况修改 Namespace
+  labels:
+    app: kube-vue-backend
+spec:
+  replicas: 1
+  # --- 新增更新策略配置 ---
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0 # 核心设置：在更新期间，不允许任何 Pod 处于不可用状态
+      maxSurge: 1       # 在更新期间，允许比预期副本数多出 1 个 Pod（即先启动新 Pod）
+    # ----------------------
+  selector:
+    matchLabels:
+      app: kube-vue-backend
+  template:
+    metadata:
+      labels:
+        app: kube-vue-backend
+    spec:
+      nodeName: node1
+      containers:
+        - name: backend
+          image: kube-vue-admin:v1.0 # 替换为你实际推送到镜像仓库的地址
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 9000 # 对应 Dockerfile 中的 EXPOSE 端口
+          # 环境变量配置（例如数据库连接）
+          env:
+            - name: MYSQL_DBNAME # 数据库名称
+              value: "kube"
+            - name: MYSQL_HOST # 数据库地址
+              value: "localhost"
+            - name: MYSQL_USER # 数据库用户
+              value: "root"
+            - name: MYSQL_PASSWORD # 数据库密码
+              value: "xxxxxx"
+            - name: MYSQL_PORT # 数据库端口
+              value: "3306"
+            - name: REDIS_DB # redis 数据库
+              value: "9"
+            - name: REDIS_HOST # redis 地址
+              value: "localhost:6379"
+            - name: REDIS_PASSWORD # redis 密码
+              value: "xxxxxx"
+          resources: # 资源配额，防止程序异常导致节点宕机
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
+          volumeMounts:
+            # 挂载到容器内的路径
+            - name: kube-config-volume
+              mountPath: "/root/.kube/config"
+              subPath: "config"
+              readOnly: true
+      volumes:
+        # 定义存储卷，来源是刚才创建的 ConfigMap
+        - name: kube-config-volume
+          configMap:
+            name: kube-config
+---
+
+# 2. 服务暴露：定义如何访问这些 Pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-vue-backend-service
+  namespace: kube-vue-admin
+spec:
+  # 1. 更改类型为 NodePort
+  type: NodePort
+  selector:
+    app: kube-vue-backend
+  ports:
+    - protocol: TCP
+      port: 9000       # 集群内部 Service 访问端口
+      targetPort: 9000 # 对应 Pod 容器内程序监听的端口
+      # 2. 可选：手动指定映射到物理机的端口 (范围 30000-32767)
+      # 如果不写这一行，系统会自动分配一个
+      nodePort: 30080
