@@ -11,4 +11,5 @@ var (
 	Deployments     v1.DeploymentLister             // 部署列表器
 	Nodes           corev1.NodeLister
 	Pods            corev1.PodLister
+	Namespaces      corev1.NamespaceLister
 )
