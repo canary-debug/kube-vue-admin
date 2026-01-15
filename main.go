@@ -1,9 +1,10 @@
 package main
 
 import (
-	config "github.com/canary-debug/kube-vue-admin/configs"
 	"io"
 	"os"
+
+	config "github.com/canary-debug/kube-vue-admin/configs"
 
 	"github.com/canary-debug/kube-vue-admin/api"
 	"github.com/canary-debug/kube-vue-admin/api/resources"
@@ -87,9 +88,9 @@ func main() {
 	{
 
 		// GetControllersInNamespace 获取指定命名空间下的所有控制器资源
-		k8sRoutes.GET("/namespaces/:namespace/controllers", resources.GetControllersInNamespace)
+		//k8sRoutes.GET("/namespaces/:namespace/controllers", resources.GetControllersInNamespace)
 		// 获取命名空间, 资源名称 返回 pod 信息
-		k8sRoutes.GET("/:namespace/:resourcename/pods", resources.GetPod)
+		//k8sRoutes.GET("/:namespace/:resourcename/pods", resources.GetPod)
 		// 获取节点资源
 		k8sRoutes.GET("/get/nodes", get_nodes_resources.GetNodes)
 		// 获取节点个数
