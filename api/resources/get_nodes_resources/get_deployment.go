@@ -9,11 +9,6 @@ import (
 	"k8s.io/apimachinery/pkg/labels"
 )
 
-//
-//var (
-//	deploymentStatus []interface{}
-//)
-
 func GetDeployment(c *gin.Context) {
 	// 创建一个切片，用于存储 deployment 的名字和状态信息
 	deploymentStatus := []interface{}{}

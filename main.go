@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/canary-debug/kube-vue-admin/api/resources/daemonset"
 	config "github.com/canary-debug/kube-vue-admin/configs"
 
 	"github.com/canary-debug/kube-vue-admin/api"
@@ -119,6 +120,12 @@ func main() {
 		k8sRoutes.GET("/pod/logs/:namespace/:pod", deployment.GetPodLogs)
 		// 天气接口
 		k8sRoutes.GET("/weather", api.Weather)
+
+		// 获取指定 daemonset	TODO
+		k8sRoutes.GET("/get/daemonset/:namespace", daemonset.GetDaemonset)
+		// 获取 Daemonset 下的所有 pods TODO
+		k8sRoutes.POST("/daemonset/pods", daemonset.Get_Daemonset_Pods)
+
 	}
 
 	r.GET("/", func(c *gin.Context) {

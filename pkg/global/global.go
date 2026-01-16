@@ -9,6 +9,7 @@ import (
 var (
 	SharedInformers informers.SharedInformerFactory // SharedInformers 全局共享的 informers
 	Deployments     v1.DeploymentLister             // 部署列表器
+	Daemonsets      v1.DaemonSetLister
 	Nodes           corev1.NodeLister
 	Pods            corev1.PodLister
 	Namespaces      corev1.NamespaceLister

@@ -63,12 +63,6 @@ func Get_Deployment_Pods(c *gin.Context) {
 		})
 		return
 	}
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("获取Deployment失败: %v", err),
-		})
-		return
-	}
 
 	// 使用Deployment的标签选择器筛选Pod
 	selector, err := metav1.LabelSelectorAsSelector(deployment.Spec.Selector)
