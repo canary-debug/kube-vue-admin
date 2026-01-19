@@ -1,6 +1,7 @@
 package daemonset
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/canary-debug/kube-vue-admin/pkg/global"
@@ -10,7 +11,7 @@ import (
 
 func GetDaemonset(c *gin.Context) {
 	// 创建一个切片，用于存储 deployment 的名字和状态信息
-	//deploymentStatus := []interface{}{}
+	daemonSetStatus := []interface{}{}
 	namespace := c.Param("namespace")
 	log.Println("namespace: ", namespace)
 
@@ -25,35 +26,44 @@ func GetDaemonset(c *gin.Context) {
 		})
 		return
 	}
-	// 遍历 deployments 返回
-	for _, daemonset := range daemonsets {
-		// 获取 deployment 的状态信息
+
+	// 遍历 daemonsets 返回
+	for _, ds := range daemonsets {
 		statusInfo := map[string]interface{}{
-			"name":     daemonset.Name,                          // daemonset 的名字
-			"replicas": daemonset.Status.DesiredNumberScheduled, // daemonset 的副本数
+			"name": ds.Name,
 		}
-		c.JSON(200, gin.H{
-			"status": statusInfo,
-		})
 
-		// 获取运行状态
-		//var runningStatus string
-		//for _, condition := range daemonset.Status.Conditions {
-		//	if condition.Type == "Available" {
-		//		if condition.Status == "True" {
-		//			// 使用格式化字符串构建 (实际/期望) 格式
-		//			runningStatus = fmt.Sprintf("运行中 (%d/%d)",
-		//				daemonset.Status.ReadyReplicas,
-		//				*daemonset.Spec.Replicas)
-		//		} else {
-		//			runningStatus = fmt.Sprintf("未就绪 (%d/%d)",
-		//				daemonset.Status.ReadyReplicas,
-		//				*daemonset.Spec.Replicas)
-		//		}
-		//		break
-		//	}
-		//}
-		//statusInfo["status"] = runningStatus
+		// 获取运行状态 (DaemonSet 特有的状态字段)
+		// DesiredNumberScheduled: 应该调度的节点数
+		// NumberReady: 已就绪的节点数
+		desired := ds.Status.DesiredNumberScheduled
+		ready := ds.Status.NumberReady
 
+		var runningStatus string
+		if ready == desired && desired > 0 {
+			runningStatus = fmt.Sprintf("运行中 (%d/%d)", ready, desired)
+		} else {
+			runningStatus = fmt.Sprintf("同步中/部分就绪 (%d/%d)", ready, desired)
+		}
+
+		statusInfo["status"] = runningStatus
+		//statusInfo["desired"] = desired
+		statusInfo["replicas"] = ready
+
+		// 5. 从 ManagedFields 获取最后更新时间
+		if len(ds.ManagedFields) > 0 {
+			lastField := ds.ManagedFields[len(ds.ManagedFields)-1]
+			if lastField.Time != nil {
+				formattedTime := lastField.Time.Format("2006-01-02 15:04:05")
+				statusInfo["update_time"] = formattedTime
+			}
+		}
+
+		daemonSetStatus = append(daemonSetStatus, statusInfo)
 	}
+
+	c.JSON(200, gin.H{
+		"Status": daemonSetStatus,
+	})
+
 }
