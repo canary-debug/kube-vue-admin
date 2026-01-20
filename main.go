@@ -12,6 +12,7 @@ import (
 	"github.com/canary-debug/kube-vue-admin/api/resources/deployment"
 	"github.com/canary-debug/kube-vue-admin/api/resources/etcd"
 	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
+	"github.com/canary-debug/kube-vue-admin/api/resources/statefulset"
 	"github.com/canary-debug/kube-vue-admin/database"
 	"github.com/canary-debug/kube-vue-admin/pkg/informer"
 	"github.com/canary-debug/kube-vue-admin/tokens"
@@ -121,10 +122,15 @@ func main() {
 		// 天气接口
 		k8sRoutes.GET("/weather", api.Weather)
 
-		// 获取指定 daemonset	TODO
+		// 获取指定 daemonset
 		k8sRoutes.GET("/get/daemonset/:namespace", daemonset.GetDaemonset)
-		// 获取 Daemonset 下的所有 pods TODO
-		k8sRoutes.POST("/daemonset/pods", daemonset.Get_Daemonset_Pods)
+		// 获取 Daemonset 下的所有 pods
+		k8sRoutes.POST("/daemonset/pods", daemonset.GetDaemonsetPods)
+
+		// 获取指定 statefulset
+		k8sRoutes.GET("/get/statefulset/:namespace", statefulset.GetStatefulset)
+		// 获取 statefulset 下的所有 pods
+		k8sRoutes.POST("/statefulset/pods", statefulset.GetStatefulsetPods)
 
 	}
 

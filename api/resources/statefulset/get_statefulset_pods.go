@@ -1,4 +1,4 @@
-package daemonset
+package statefulset
 
 import (
 	"fmt"
@@ -23,24 +23,24 @@ type PodInfo struct {
 	Labels       map[string]string `json:"labels"`
 }
 
-// GetDaemonSetPods 获取 DaemonSet pods 请求结构体
-type GetDaemonSetPods struct {
+// GetStatefulSetPods 获取 StatefulSet pods 请求结构体
+type GetStatefulSetPods struct {
 	Name      string `json:"name" binding:"required"`
 	Namespace string `json:"namespace" binding:"required"`
 }
 
-// GetDaemonsetPods 获取指定 DaemonSet 下的所有 Pod
-func GetDaemonsetPods(c *gin.Context) {
+// GetStatefulsetPods 获取指定 StatefulSet 下的所有 Pod
+func GetStatefulsetPods(c *gin.Context) {
 	// 1. 请求参数绑定
-	var getDaemonSetPods GetDaemonSetPods
-	if err := c.ShouldBindJSON(&getDaemonSetPods); err != nil {
+	var getStatefulSetPods GetStatefulSetPods
+	if err := c.ShouldBindJSON(&getStatefulSetPods); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "无效的请求体",
 		})
 		return
 	}
 
-	// 2. 验证客户端和 Informer 是否初始化 (需确保 global 中有 DaemonSets)
+	// 2. 验证客户端和 Informer 是否初始化
 	if resources.Clientset == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Kubernetes客户端未初始化",
@@ -48,25 +48,25 @@ func GetDaemonsetPods(c *gin.Context) {
 		return
 	}
 
-	// 注意：此处假设你的 global 包中定义了 DaemonSets 的 Informer/Lister
-	if global.Daemonsets == nil || global.Pods == nil {
+	// 注意：确保 global 包中定义并初始化了 Statefulsets 的 Informer/Lister
+	if global.Statefulset == nil || global.Pods == nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "全局DaemonSet或Pod Informer未初始化",
+			"error": "全局StatefulSet或Pod Informer未初始化",
 		})
 		return
 	}
 
-	// 3. 获取 DaemonSet 信息
-	ds, err := global.Daemonsets.DaemonSets(getDaemonSetPods.Namespace).Get(getDaemonSetPods.Name)
+	// 3. 获取 StatefulSet 信息 (用于获取 LabelSelector)
+	sts, err := global.Statefulset.StatefulSets(getStatefulSetPods.Namespace).Get(getStatefulSetPods.Name)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("获取DaemonSet失败: %v", err),
+			"error": fmt.Sprintf("获取StatefulSet失败: %v", err),
 		})
 		return
 	}
 
-	// 4. 使用 DaemonSet 的标签选择器转换成 Selector 对象
-	selector, err := metav1.LabelSelectorAsSelector(ds.Spec.Selector)
+	// 4. 使用 StatefulSet 的标签选择器转换成 Selector 对象
+	selector, err := metav1.LabelSelectorAsSelector(sts.Spec.Selector)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": fmt.Sprintf("转换标签选择器失败: %v", err),
@@ -75,7 +75,7 @@ func GetDaemonsetPods(c *gin.Context) {
 	}
 
 	// 5. 使用 Pod Lister 筛选符合该 Selector 的 Pod
-	pods, err := global.Pods.Pods(getDaemonSetPods.Namespace).List(selector)
+	pods, err := global.Pods.Pods(getStatefulSetPods.Namespace).List(selector)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": fmt.Sprintf("获取Pod列表失败: %v", err),
