@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/canary-debug/kube-vue-admin/api/resources/daemonset"
+	"github.com/canary-debug/kube-vue-admin/api/resources/pod"
 	config "github.com/canary-debug/kube-vue-admin/configs"
 
 	"github.com/canary-debug/kube-vue-admin/api"
@@ -131,6 +132,9 @@ func main() {
 		k8sRoutes.GET("/get/statefulset/:namespace", statefulset.GetStatefulset)
 		// 获取 statefulset 下的所有 pods
 		k8sRoutes.POST("/statefulset/pods", statefulset.GetStatefulsetPods)
+
+		// 删除 指定命令空间下的 pod
+		k8sRoutes.DELETE("/delete/pod/:namespace/:podname", pod.DeletePod)
 
 	}
 
