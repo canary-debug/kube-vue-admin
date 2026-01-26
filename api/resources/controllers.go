@@ -10,11 +10,13 @@ import (
 	"github.com/gin-gonic/gin"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
 )
 
 var Clientset *kubernetes.Clientset
+var RestConfig *rest.Config
 
 // 创建 Clientset
 func init() {
@@ -27,6 +29,7 @@ func init() {
 	flag.Parse()
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	RestConfig = config // 保存 rest.Config
 	if err != nil {
 		panic(err)
 	}

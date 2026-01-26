@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/canary-debug/kube-vue-admin/api/resources/daemonset"
+	"github.com/canary-debug/kube-vue-admin/api/resources/exec"
 	"github.com/canary-debug/kube-vue-admin/api/resources/pod"
 	config "github.com/canary-debug/kube-vue-admin/configs"
 
@@ -136,7 +137,11 @@ func main() {
 		// 删除 指定命令空间下的 pod
 		k8sRoutes.DELETE("/delete/pod/:namespace/:podname", pod.DeletePod)
 
+		// 可以在容器中执行命令
+		//k8sRoutes.GET("/ws/terminal", exec.Terminal)
+
 	}
+	r.GET("/ws/terminal", exec.Terminal)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
