@@ -138,7 +138,10 @@ func main() {
 		k8sRoutes.DELETE("/delete/pod/:namespace/:podname", pod.DeletePod)
 
 		// 可以在容器中执行命令
-		//k8sRoutes.GET("/ws/terminal", exec.Terminal)
+		k8sRoutes.GET("/ws/terminal", exec.Terminal)
+
+		// 获取 pod 的所有容器
+		k8sRoutes.GET("/get/pod/containers/:namespace/:podname", pod.GetPodContainersHandler)
 
 	}
 	r.GET("/ws/terminal", exec.Terminal)
