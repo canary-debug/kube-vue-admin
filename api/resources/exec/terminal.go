@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/canary-debug/kube-vue-admin/api/resources"
 	"github.com/gin-gonic/gin"
@@ -50,8 +51,18 @@ func (t *TerminalSession) Read(p []byte) (int, error) {
 }
 
 func (t *TerminalSession) Write(p []byte) (int, error) {
-	err := t.wsConn.WriteMessage(websocket.TextMessage, p)
-	return len(p), err
+	// 添加控制序列过滤，移除可能导致显示问题的序列
+	output := string(p)
+
+	// 移除常见的控制序列干扰
+	output = strings.ReplaceAll(output, "[?2004l", "") // 禁用bracketed paste mode
+	output = strings.ReplaceAll(output, "[?2004h", "") // 启用bracketed paste mode
+
+	// 如果输出以这些序列开头，可能是初始化序列，可以过滤掉
+	output = strings.TrimPrefix(output, "[?2004l")
+
+	err := t.wsConn.WriteMessage(websocket.TextMessage, []byte(output))
+	return len(output), err
 }
 
 func (t *TerminalSession) Next() *remotecommand.TerminalSize {
@@ -65,9 +76,9 @@ var upgrader = websocket.Upgrader{
 }
 
 func Terminal(c *gin.Context) {
-
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
 		return
 	}
 	defer ws.Close()
@@ -90,7 +101,7 @@ func Terminal(c *gin.Context) {
 		SubResource("exec").
 		VersionedParams(&corev1.PodExecOptions{
 			Container: containerName,
-			Command:   []string{"/bin/sh", "-c", "TERM=xterm-256color; export TERM; [ -x /bin/bash ] && exec /bin/bash || exec /bin/sh"},
+			Command:   []string{"env", "TERM=xterm-256color", "/bin/sh", "-c", "exec ${SHELL:-/bin/sh}"}, // 修改命令
 			Stdin:     true,
 			Stdout:    true,
 			Stderr:    true,
@@ -99,6 +110,7 @@ func Terminal(c *gin.Context) {
 
 	executor, err := remotecommand.NewSPDYExecutor(resources.RestConfig, "POST", req.URL())
 	if err != nil {
+		log.Printf("Create executor error: %v", err)
 		return
 	}
 
@@ -111,7 +123,6 @@ func Terminal(c *gin.Context) {
 		Tty:               true,
 	})
 	if err != nil {
-		log.Println("Stream error:", err)
+		log.Printf("Stream error: %v", err)
 	}
-
 }
