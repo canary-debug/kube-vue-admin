@@ -21,6 +21,7 @@ func StartInformer(stopCh <-chan struct{}) {
 		{Group: "", Version: "v1", Resource: "namespaces"},
 		{Group: "apps", Version: "v1", Resource: "daemonsets"},
 		{Group: "apps", Version: "v1", Resource: "statefulsets"},
+		{Group: "", Version: "v1", Resource: "services"},
 	}
 	for _, gvr := range gvrs {
 		SharedInformers.ForResource(gvr)
@@ -38,6 +39,7 @@ func StartInformer(stopCh <-chan struct{}) {
 	global.Namespaces = SharedInformers.Core().V1().Namespaces().Lister()
 	global.Daemonsets = SharedInformers.Apps().V1().DaemonSets().Lister()
 	global.Statefulset = SharedInformers.Apps().V1().StatefulSets().Lister()
+	global.Services = SharedInformers.Core().V1().Services().Lister()
 
 	log.Println("所有 Informer 启动同步完成，正在持续监听...")
 }

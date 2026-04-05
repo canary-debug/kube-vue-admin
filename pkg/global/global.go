@@ -14,4 +14,5 @@ var (
 	Nodes           corev1.NodeLister      // 节点列表器
 	Pods            corev1.PodLister       // Pod列表器
 	Namespaces      corev1.NamespaceLister // 命名空间列表器
+	Services        corev1.ServiceLister   // Service列表器
 )

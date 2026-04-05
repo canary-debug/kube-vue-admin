@@ -14,6 +14,7 @@ import (
 	"github.com/canary-debug/kube-vue-admin/api/resources/deployment"
 	"github.com/canary-debug/kube-vue-admin/api/resources/etcd"
 	"github.com/canary-debug/kube-vue-admin/api/resources/get_nodes_resources"
+	"github.com/canary-debug/kube-vue-admin/api/resources/service"
 	"github.com/canary-debug/kube-vue-admin/api/resources/statefulset"
 	"github.com/canary-debug/kube-vue-admin/database"
 	"github.com/canary-debug/kube-vue-admin/pkg/informer"
@@ -133,6 +134,9 @@ func main() {
 		k8sRoutes.GET("/get/statefulset/:namespace", statefulset.GetStatefulset)
 		// 获取 statefulset 下的所有 pods
 		k8sRoutes.POST("/statefulset/pods", statefulset.GetStatefulsetPods)
+
+		// 获取所有或指定命名空间下的 services
+		k8sRoutes.GET("/get/services/:namespace", service.GetServices)
 
 		// 删除 指定命令空间下的 pod
 		k8sRoutes.DELETE("/delete/pod/:namespace/:podname", pod.DeletePod)
