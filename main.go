@@ -141,6 +141,9 @@ func main() {
 		// 删除 指定命令空间下的 pod
 		k8sRoutes.DELETE("/delete/pod/:namespace/:podname", pod.DeletePod)
 
+		// 删除 指定命名空间下的 service
+		k8sRoutes.DELETE("/delete/service/:namespace/:servicename", service.DeleteService)
+
 		// 可以在容器中执行命令
 		k8sRoutes.GET("/ws/terminal", exec.Terminal)
 
