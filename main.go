@@ -150,6 +150,9 @@ func main() {
 		// 获取 pod 的所有容器
 		k8sRoutes.GET("/get/pod/containers/:namespace/:podname", pod.GetPodContainersHandler)
 
+		// 搜索 pod
+		k8sRoutes.GET("/get/pods/search", pod.SearchPodHandler)
+
 	}
 	r.GET("/ws/terminal", exec.Terminal)
 
